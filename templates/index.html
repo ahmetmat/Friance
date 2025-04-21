@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Investor Copilot</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #3a86ff;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    body {
+      background-color: #f3f4f6;
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: #64748b;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .form-step {
+      display: none;
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .form-step.active {
+      display: block;
+    }
+    
+    .step-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .step-number {
+      background: var(--primary);
+      color: white;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 0.75rem;
+    }
+    
+    .step-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #4b5563;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+    }
+    
+    .btn-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-size: 1rem;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #d1d5db;
+      color: #6b7280;
+    }
+    
+    .btn-outline:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .progress-container {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 2rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .progress-container::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 4px;
+      width: 100%;
+      background-color: #e5e7eb;
+      z-index: 0;
+    }
+    
+    .progress-bar {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 4px;
+      background-color: var(--primary);
+      z-index: 1;
+      transition: width 0.3s ease;
+    }
+    
+    .step-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: white;
+      border: 4px solid #e5e7eb;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    
+    .step-circle.active {
+      border-color: var(--primary);
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .step-circle.completed {
+      border-color: var(--primary);
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    /* Results Page Styling */
+    .results-container {
+      display: none;
+    }
+    
+    .results-container.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      font-size: 1.25rem;
+    }
+    
+    .market-icon {
+      background-color: #e0f2fe;
+      color: #0284c7;
+    }
+    
+    .portfolio-icon {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+    
+    .wallet-icon {
+      background-color: #dcfce7;
+      color: #16a34a;
+    }
+    
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .btc-update {
+      background-color: #eff6ff;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .btc-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      font-size: 1.25rem;
+      color: #f59e0b;
+    }
+    
+    .btc-text {
+      font-weight: 500;
+    }
+    
+    .market-columns {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .market-column {
+      flex: 1;
+    }
+    
+    .coin-list {
+      list-style: none;
+    }
+    
+    .coin-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .coin-item:last-child {
+      border-bottom: none;
+    }
+    
+    .coin-symbol {
+      font-weight: 500;
+    }
+    
+    .gain {
+      color: var(--success);
+      font-weight: 500;
+    }
+    
+    .loss {
+      color: var(--danger);
+      font-weight: 500;
+    }
+    
+    .recommendation-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+    
+    .recommendation-item {
+      background-color: #f8fafc;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .recommendation-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    
+    .coin-tag {
+      background-color: #e0f2fe;
+      color: #0284c7;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    
+    .allocation {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .recommendation-reason {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+    
+    .wallet-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .info-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+    
+    .info-value {
+      font-weight: 600;
+    }
+    
+    .address-value {
+      font-size: 0.875rem;
+      word-break: break-all;
+    }
+    
+    .token-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      background-color: #f8fafc;
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .token-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #e0f2fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 0.75rem;
+      font-size: 1rem;
+      color: #0284c7;
+    }
+    
+    .token-details {
+      flex: 1;
+    }
+    
+    .token-amount {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+    
+    .token-value {
+      font-weight: 600;
+    }
+    
+    .summary-text {
+      line-height: 1.6;
+      margin-top: 1rem;
+    }
+    
+    .strategy-card {
+      background-color: #f0f9ff;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .strategy-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .restart-btn {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Tags Input Styling */
+    .tags-input-container {
+      border: 1px solid #d1d5db;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .tag-item {
+      background-color: #e0f2fe;
+      color: #0284c7;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .tag-close {
+      margin-left: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .tags-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 0.25rem;
+      min-width: 150px;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 640px) {
+      .market-columns {
+        flex-direction: column;
+      }
+      
+      .btn-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Crypto Investor Copilot</h1>
+      <p class="subtitle">Your personalized assistant for data-driven cryptocurrency investment decisions</p>
+    </header>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+      <div class="step-circle active">1</div>
+      <div class="step-circle">2</div>
+      <div class="step-circle">3</div>
+    </div>
+    
+    <form id="investor-form">
+      <!-- Step 1: Personal Information -->
+      <div class="form-step active" id="step1">
+        <div class="step-header">
+          <div class="step-number">1</div>
+          <h2 class="step-title">Personal Information</h2>
+        </div>
+        <div class="form-group">
+          <label for="name">Your Name</label>
+          <input type="text" id="name" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label for="budget">Investment Budget (USD)</label>
+          <input type="number" id="budget" placeholder="5000" min="100" required>
+        </div>
+        <div class="btn-container">
+          <div></div> <!-- Empty div for spacing -->
+          <button type="button" class="btn btn-primary" id="next1">Continue <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+      
+      <!-- Step 2: Investment Preferences -->
+      <div class="form-step" id="step2">
+        <div class="step-header">
+          <div class="step-number">2</div>
+          <h2 class="step-title">Investment Preferences</h2>
+        </div>
+        <div class="form-group">
+          <label for="risk">Risk Tolerance</label>
+          <select id="risk" required>
+            <option value="low">Low - Safety First</option>
+            <option value="medium" selected>Medium - Balanced Approach</option>
+            <option value="high">High - Maximum Growth</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Investment Interests</label>
+          <div class="tags-input-container" id="tags-container">
+            <input type="text" class="tags-input" id="tags-input" placeholder="Type and press Enter (e.g. AI, DeFi, Web3)">
+          </div>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-outline" id="prev2"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="button" class="btn btn-primary" id="next2">Continue <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+      
+      <!-- Step 3: Wallet Information -->
+      <div class="form-step" id="step3">
+        <div class="step-header">
+          <div class="step-number">3</div>
+          <h2 class="step-title">Wallet Information</h2>
+        </div>
+        <div class="form-group">
+          <label for="wallet_address">Wallet Address</label>
+          <input type="text" id="wallet_address" placeholder="0x94845333028B1204Fbe14E1278Fd4Adde46B22ce" required>
+        </div>
+        <div class="form-group">
+          <label for="etherscan_key">Etherscan API Key</label>
+          <input type="text" id="etherscan_key" placeholder="Your Etherscan API Key" required>
+        </div>
+        <div class="btn-container">
+          <button type="button" class="btn btn-outline" id="prev3"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="submit" class="btn btn-primary" id="analyze"><i class="fas fa-chart-line"></i> Analyze Portfolio</button>
+        </div>
+      </div>
+    </form>
+    
+    <!-- Results Page -->
+    <div class="results-container" id="results">
+      <!-- Market Summary Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon market-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3 class="card-title">Market Summary</h3>
+        </div>
+        
+        <div class="btc-update">
+          <div class="btc-icon">
+            <i class="fab fa-bitcoin"></i>
+          </div>
+          <div class="btc-text">Bitcoin is up <span class="gain" id="btc-pct">3.53%</span> today</div>
+        </div>
+        
+        <div class="market-columns">
+          <div class="market-column">
+            <h4><i class="fas fa-arrow-up"></i> Top Gainers</h4>
+            <ul class="coin-list" id="gainers-list">
+              <!-- Will be populated by JS -->
+            </ul>
+          </div>
+          
+          <div class="market-column">
+            <h4><i class="fas fa-arrow-down"></i> Top Losers</h4>
+            <ul class="coin-list" id="losers-list">
+              <!-- Will be populated by JS -->
+            </ul>
+          </div>
+        </div>
+        
+        <p class="summary-text" id="market-summary">
+          <!-- Will be populated by JS -->
+        </p>
+      </div>
+      
+      <!-- Portfolio Recommendation Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon portfolio-icon">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <h3 class="card-title">Portfolio Recommendation</h3>
+        </div>
+        
+        <div class="strategy-card">
+          <div class="strategy-title">
+            <i class="fas fa-chess"></i> Strategy
+          </div>
+          <p id="strategy-text"><!-- Will be populated by JS --></p>
+        </div>
+        
+        <ul class="recommendation-list" id="recommendation-list">
+          <!-- Will be populated by JS -->
+        </ul>
+      </div>
+      
+      <!-- Wallet Analysis Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon wallet-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <h3 class="card-title">Wallet Analysis</h3>
+        </div>
+        
+        <div class="wallet-info">
+          <div class="info-row">
+            <span class="info-label">Wallet Address:</span>
+            <span class="info-value address-value" id="wallet-address"></span>
+          </div>
+          
+          <div class="info-row">
+            <span class="info-label">Total Holdings (USD):</span>
+            <span class="info-value" id="holdings-value"></span>
+          </div>
+          
+          <div>
+            <div class="info-label">Token Breakdown:</div>
+            <div id="token-list">
+              <!-- Will be populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn btn-outline restart-btn" id="restart">
+        <i class="fas fa-redo"></i> Start New Analysis
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Sample response data
+    const sampleData = {
+      "market_summary": {
+        "btc_pct": 3.53,
+        "gainers": [
+          { "change": 14.26, "symbol": "STX" },
+          { "change": 9.5, "symbol": "Fartcoin" },
+          { "change": 8.32, "symbol": "KAS" },
+          { "change": 7.12, "symbol": "SUI" },
+          { "change": 6.8, "symbol": "XLM" }
+        ],
+        "losers": [
+          { "change": -2.7, "symbol": "DEXE" },
+          { "change": -2.36, "symbol": "TKX" },
+          { "change": -0.23, "symbol": "TRX" },
+          { "change": -0.14, "symbol": "SUSDS" },
+          { "change": -0.09, "symbol": "USDC" }
+        ],
+        "markdown": "**📈 Top Gainers**\n- STX +14.26%\n- Fartcoin +9.5%\n- KAS +8.32%\n- SUI +7.12%\n- XLM +6.8%\n\n**📉 Top Losers**\n- DEXE -2.7%\n- TKX -2.36%\n- TRX -0.23%\n- SUSDS -0.14%\n- USDC -0.09%\n\n**💰 Bitcoin Update**\n- Bitcoin is up 📈 3.53%",
+        "summary": "The market is seeing a positive trend with Bitcoin up 3.53%, led by top gainers STX, Fartcoin, and KAS, while DEXE, TKX, and TRX are among the losers."
+      },
+      "portfolio_recommendation": {
+        "markdown": "**💼 Portfolio Recommendation**\n- STX (30%): Recent high gains indicate strong momentum...\n- SUI (20%): AI-focused with potential for growth...\n- XLM (50%): Stable infrastructure for balanced risk...",
+        "recommended": [
+          {
+            "alloc_pct": 30,
+            "reason": "Strong short-term momentum with 14.26% gain",
+            "symbol": "stx"
+          },
+          {
+            "alloc_pct": 20,
+            "reason": "Growing AI ecosystem potential",
+            "symbol": "sui"
+          },
+          {
+            "alloc_pct": 50,
+            "reason": "Established infrastructure with medium-risk stability",
+            "symbol": "xlm"
+          }
+        ],
+        "strategy": "Balanced risk with AI and infrastructure focus, considering medium risk level."
+      },
+      "wallet_analysis": {
+        "address": "0x94845333028B1204Fbe14E1278Fd4Adde46B22ce",
+        "holdings_usd": 8528.13,
+        "token_breakdown": [
+          {
+            "amount": 2.842711376299289,
+            "symbol": "ETH",
+            "usd_value": 8528.13
+          }
+        ]
+      }
+    };
+
+    // Multi-step form navigation
+    const steps = ["step1", "step2", "step3"];
+    let currentStep = 0;
+    
+    document.getElementById('next1').addEventListener('click', () => {
+      if (document.getElementById('name').value && document.getElementById('budget').value) {
+        nextStep();
+      } else {
+        alert('Please fill in all required fields.');
+      }
+    });
+    
+    document.getElementById('next2').addEventListener('click', nextStep);
+    document.getElementById('prev2').addEventListener('click', prevStep);
+    document.getElementById('prev3').addEventListener('click', prevStep);
+    
+    function nextStep() {
+      document.getElementById(steps[currentStep]).classList.remove('active');
+      currentStep++;
+      document.getElementById(steps[currentStep]).classList.add('active');
+      updateProgress();
+    }
+    
+    function prevStep() {
+      document.getElementById(steps[currentStep]).classList.remove('active');
+      currentStep--;
+      document.getElementById(steps[currentStep]).classList.add('active');
+      updateProgress();
+    }
+    
+    function updateProgress() {
+      // Update progress bar
+      const progressBar = document.getElementById('progress-bar');
+      const progressPercentage = (currentStep / (steps.length - 1)) * 100;
+      progressBar.style.width = `${progressPercentage}%`;
+      
+      // Update step circles
+      const stepCircles = document.querySelectorAll('.step-circle');
+      stepCircles.forEach((circle, index) => {
+        if (index < currentStep) {
+          circle.classList.add('completed');
+          circle.innerHTML = '<i class="fas fa-check"></i>';
+        } else if (index === currentStep) {
+          circle.classList.add('active');
+          circle.innerHTML = index + 1;
+        } else {
+          circle.classList.remove('active', 'completed');
+          circle.innerHTML = index + 1;
+        }
+      });
+    }
+    
+    // Tags input functionality
+    const tagsContainer = document.getElementById('tags-container');
+    const tagsInput = document.getElementById('tags-input');
+    const tags = [];
+    
+    tagsInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && tagsInput.value.trim() !== '') {
+        e.preventDefault();
+        const tag = tagsInput.value.trim();
+        if (!tags.includes(tag)) {
+          tags.push(tag);
+          addTag(tag);
+        }
+        tagsInput.value = '';
+      }
+    });
+    
+    function addTag(tag) {
+      const tagElement = document.createElement('div');
+      tagElement.classList.add('tag-item');
+      tagElement.innerHTML = `
+        ${tag}
+        <span class="tag-close">&times;</span>
+      `;
+      
+      tagElement.querySelector('.tag-close').addEventListener('click', () => {
+        tagElement.remove();
+        tags.splice(tags.indexOf(tag), 1);
+      });
+      
+      tagsContainer.insertBefore(tagElement, tagsInput);
+    }
+    
+    // Initial tags (if any)
+    ['AI', 'DeFi', 'Web3'].forEach(tag => {
+      tags.push(tag);
+      addTag(tag);
+    });
+    
+    // Form submission
+    document.getElementById('investor-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // In a real application, you would send the data to the server
+      // For this example, we'll just show the results page with sample data
+      document.querySelector('form').style.display = 'none';
+      document.querySelector('.progress-container').style.display = 'none';
+      
+      // Show results
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.classList.add('active');
+      
+      // Populate results with data
+      populateResults(sampleData);
+    });
+    
+    function populateResults(data) {
+      // Market Summary
+      document.getElementById('btc-pct').textContent = `${data.market_summary.btc_pct}%`;
+      
+      const gainersList = document.getElementById('gainers-list');
+      gainersList.innerHTML = '';
+      data.market_summary.gainers.forEach(coin => {
+        const li = document.createElement('li');
+        li.classList.add('coin-item');
+        li.innerHTML = `
+          <span class="coin-symbol">${coin.symbol}</span>
+          <span class="gain">+${coin.change}%</span>
+        `;
+        gainersList.appendChild(li);
+      });
+      
+      const losersList = document.getElementById('losers-list');
+      losersList.innerHTML = '';
+      data.market_summary.losers.forEach(coin => {
+        const li = document.createElement('li');
+        li.classList.add('coin-item');
+        li.innerHTML = `
+          <span class="coin-symbol">${coin.symbol}</span>
+          <span class="loss">${coin.change}%</span>
+        `;
+        losersList.appendChild(li);
+      });
+      
+      document.getElementById('market-summary').textContent = data.market_summary.summary;
+      
+      // Portfolio Recommendation
+      document.getElementById('strategy-text').textContent = data.portfolio_recommendation.strategy;
+      
+      const recommendationList = document.getElementById('recommendation-list');
+      recommendationList.innerHTML = '';
+      data.portfolio_recommendation.recommended.forEach(rec => {
+        const li = document.createElement('li');
+        li.classList.add('recommendation-item');
+        li.innerHTML = `
+          <div class="recommendation-header">
+            <span class="coin-tag">${rec.symbol.toUpperCase()}</span>
+            <span class="allocation">${rec.alloc_pct}%</span>
+          </div>
+          <p class="recommendation-reason">${rec.reason}</p>
+        `;
+        recommendationList.appendChild(li);
+      });
+      
+      // Wallet Analysis
+      document.getElementById('wallet-address').textContent = data.wallet_analysis.address;
+      document.getElementById('holdings-value').textContent = `$${data.wallet_analysis.holdings_usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      
+      const tokenList = document.getElementById('token-list');
+      tokenList.innerHTML = '';
+      data.wallet_analysis.token_breakdown.forEach(token => {
+        const div = document.createElement('div');
+        div.classList.add('token-item');
+        div.innerHTML = `
+          <div class="token-icon">
+            <i class="fab fa-ethereum"></i>
+          </div>
+          <div class="token-details">
+            <div class="token-symbol">${token.symbol}</div>
+            <div class="token-amount">${token.amount.toFixed(6)} ${token.symbol}</div>
+          </div>
+          <div class="token-value">$${token.usd_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+        `;
+        tokenList.appendChild(div);
+      });
+    }
+    
+    // Restart button
+    document.getElementById('restart').addEventListener('click', function() {
+      // Reset form
+      document.getElementById('investor-form').reset();
+      
+      // Reset tags
+      const tagElements = document.querySelectorAll('.tag-item');
+      tagElements.forEach(el => el.remove());
+      tags.length = 0; // Clear tags array
+      
+      // Add initial tags again
+      ['AI', 'DeFi', 'Web3'].forEach(tag => {
+        tags.push(tag);
+        addTag(tag);
+      });
+      
+      // Reset to first step
+      document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
+      document.getElementById('step1').classList.add('active');
+      currentStep = 0;
+      updateProgress();
+      
+      // Show form and hide results
+      document.querySelector('form').style.display = 'block';
+      document.querySelector('.progress-container').style.display = 'flex';
+      document.getElementById('results').classList.remove('active');
+    });
+    
+    // Function to simulate a loading/analysis process 
+    function simulateAnalysis() {
+      // Create and show loading indicator
+      const loadingEl = document.createElement('div');
+      loadingEl.classList.add('loading-container');
+      loadingEl.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>Analyzing your portfolio and market data...</p>
+      `;
+      document.body.appendChild(loadingEl);
+      
+      // Simulate API delay
+      setTimeout(() => {
+        // Remove loading indicator
+        loadingEl.remove();
+        
+        // Show results
+        document.querySelector('form').style.display = 'none';
+        document.querySelector('.progress-container').style.display = 'none';
+        document.getElementById('results').classList.add('active');
+        
+        // Populate with sample data
+        populateResults(sampleData);
+      }, 2000);
+    }
+    
+    // Loading spinner styles (add to the existing stylesheet)
+    const style = document.createElement('style');
+    style.textContent = `
+      .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Update form submission to use the loading animation
+    document.getElementById('investor-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      simulateAnalysis();
+    });
+  </script>
+</body>
+</html>
+</antArtifact>
