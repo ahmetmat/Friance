@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 import json, os
 from marketsweep.exchange import BinanceConnector, BitgetConnector, EthereumWalletConnector
 
@@ -8,6 +8,23 @@ PROFILE_PATH = os.path.join(os.path.dirname(__file__), "marketsweep", "user_prof
 @app.route('/', methods=['GET'])
 def root():
     return render_template("index.html")
+@app.after_request
+def add_security_headers(response):
+    # CSP başlığını tanımla - API yanıtlarını etkilemeyecek şekilde
+    if response.mimetype == 'text/html':
+        csp = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-eval' https://cdnjs.cloudflare.com; "
+            "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+            "img-src 'self' data:; "
+            "font-src 'self' https://cdnjs.cloudflare.com; "
+            "connect-src 'self'; "
+            "worker-src 'self'; "
+            "frame-src 'self'; "
+            "object-src 'none';"
+        )
+        response.headers['Content-Security-Policy'] = csp
+    return response
 
 @app.route("/save-profile", methods=["POST"])
 def save_profile():
@@ -22,61 +39,123 @@ def save_profile():
         json.dump(data['profile'], f, indent=2)
     return jsonify({"status": "success"}), 200
 
+# Add to server.py - enhanced error handling in the /analyze route
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.get_json()
-
-    from marketsweep.tools import fetch_market_data, fetch_news
-    from marketsweep.agent import summarize_market
-    from marketsweep.recommender_agent import recommend_portfolio
-
-    market = fetch_market_data()
-    news = fetch_news()
-    
-    # Get wallet/exchange data based on connection type
-    connection_type = data.get('connection_type', 'wallet')
-    wallet = None
-    
     try:
-        if connection_type == 'wallet':
-            wallet_connector = EthereumWalletConnector(
-                data['wallet_address'],
-                data.get('etherscan_api_key', os.environ.get('ETHERSCAN_API_KEY', ''))
-            )
-            wallet = wallet_connector.get_portfolio_value()
-            
-        elif connection_type == 'binance':
-            binance_connector = BinanceConnector(
-                data['binance_api_key'],
-                data['binance_secret']
-            )
-            wallet = binance_connector.get_portfolio_value()
-            
-        elif connection_type == 'bitget':
-            bitget_connector = BitgetConnector(
-                data['bitget_api_key'],
-                data['bitget_secret'],
-                data['bitget_passphrase']
-            )
-            wallet = bitget_connector.get_portfolio_value()
+        data = request.get_json()
+        print(f"Received analysis request: {data.get('connection_type')}")
+
+        from marketsweep.tools import fetch_market_data, fetch_news
+        from marketsweep.agent import summarize_market
+        from marketsweep.recommender_agent import recommend_portfolio
+        from marketsweep.portfolio_analyzer import analyze_wallet_performance
+        from marketsweep.exchange import BinanceConnector, BitgetConnector, EthereumWalletConnector
+
+        market = fetch_market_data()
+        news = fetch_news()
+        
+        # Get wallet/exchange data
+        connection_type = data.get('connection_type', 'wallet')
+        wallet = None
+        
+        try:
+            if connection_type == 'wallet':
+                print(f"Connecting to Ethereum wallet: {data.get('wallet_address', '')[:10]}...")
+                wallet_connector = EthereumWalletConnector(
+                    data['wallet_address'],
+                    data.get('etherscan_api_key', os.environ.get('ETHERSCAN_API_KEY', ''))
+                )
+                wallet = wallet_connector.get_portfolio_value()
+                
+            elif connection_type == 'binance':
+                print("Connecting to Binance account...")
+                binance_connector = BinanceConnector(
+                    data['binance_api_key'],
+                    data['binance_secret']
+                )
+                wallet = binance_connector.get_portfolio_value()
+                
+            elif connection_type == 'bitget':
+                print("Connecting to Bitget account...")
+                bitget_connector = BitgetConnector(
+                    data['bitget_api_key'],
+                    data['bitget_secret'],
+                    data['bitget_passphrase']
+                )
+                wallet = bitget_connector.get_portfolio_value()
+                
+        except Exception as e:
+            print(f"Error connecting to {connection_type}: {str(e)}")
+            return jsonify({
+                "status": "error",
+                "message": f"Failed to fetch wallet/exchange data: {str(e)}"
+            }), 400
+
+        print(f"Successfully retrieved wallet data: {wallet.get('holdings_usd')} USD")
+        profile = data.get('profile')  # user profile from request
+
+        # Analyze wallet performance (detect profit/loss)
+        if wallet:
+            print("Analyzing wallet performance...")
+            try:
+                wallet_performance = analyze_wallet_performance(wallet, market)
+                wallet.update(wallet_performance)
+                print(f"Wallet performance: {wallet_performance.get('portfolio_change_pct', 0)}%")
+            except Exception as e:
+                print(f"Error analyzing wallet performance: {str(e)}")
+                # Continue without performance analysis
+
+        # Generate outputs
+        print("Generating market summary...")
+        try:
+            summary = summarize_market(market, news)
+        except Exception as e:
+            print(f"Error generating market summary: {str(e)}")
+            # Create a basic summary as fallback
+            summary = {
+                "summary": "Market analysis currently unavailable.",
+                "gainers": market.get("gainers", []),
+                "losers": market.get("losers", []),
+                "btc_pct": market.get("btc_pct", 0),
+                "markdown": "**Market Summary**\nMarket analysis currently unavailable."
+            }
+        
+        print("Generating portfolio recommendation...")
+        try:
+            recommendation = recommend_portfolio(profile, market, wallet)
+            print("Portfolio recommendation generated successfully")
+        except Exception as e:
+            print(f"Error generating portfolio recommendation: {str(e)}")
+            # Create a basic recommendation as fallback
+            from marketsweep.recommender_agent import create_fallback_recommendation
+            recommendation = create_fallback_recommendation(market, wallet)
+            print("Generated fallback recommendation")
+
+        # Make sure wallet has address field
+        if wallet and 'address' not in wallet:
+            if connection_type == 'bitget':
+                wallet['address'] = f"Bitget Account: {data['bitget_api_key'][:5]}...{data['bitget_api_key'][-5:]}"
+            elif connection_type == 'binance':
+                wallet['address'] = f"Binance Account: {data['binance_api_key'][:5]}...{data['binance_api_key'][-5:]}"
+
+        result = {
+            'market_summary': summary,
+            'portfolio_recommendation': recommendation,
+            'wallet_analysis': wallet
+        }
+        
+        print("Analysis complete, returning results")
+        return jsonify(result)
     except Exception as e:
+        import traceback
+        print(f"Unexpected error in analyze endpoint: {str(e)}")
+        print(traceback.format_exc())
         return jsonify({
             "status": "error",
-            "message": f"Failed to fetch wallet/exchange data: {str(e)}"
-        }), 400
-
-    profile = data.get('profile')  # use profile sent in request
-
-    # Generate outputs
-    summary = summarize_market(market, news)
-    recommendation = recommend_portfolio(profile, market)
-
-    result = {
-        'market_summary': summary,
-        'portfolio_recommendation': recommendation,
-        'wallet_analysis': wallet
-    }
-    return jsonify(result)
-
+            "message": f"An unexpected error occurred: {str(e)}"
+        }), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

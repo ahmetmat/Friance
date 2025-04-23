@@ -46,6 +46,75 @@ class BitgetConnector(ExchangeConnector):
         
         return response.json()
     
+    def get_all_account_balances(self) -> Dict:
+        """
+        Get overview of all account balances (spot, futures, funding, earn, bots, margin)
+        
+        Returns:
+            Dict containing balances in USDT for all account types
+        """
+        endpoint = "/api/v2/account/all-account-balance"
+        method = "GET"
+        timestamp = str(int(time.time() * 1000))
+        
+        signature = self._generate_signature(timestamp, method, endpoint)
+        
+        headers = {
+            "ACCESS-KEY": self.api_key,
+            "ACCESS-SIGN": signature,
+            "ACCESS-TIMESTAMP": timestamp,
+            "ACCESS-PASSPHRASE": self.passphrase,
+            "Content-Type": "application/json",
+            "locale": "en-US"
+        }
+        
+        url = f"{self.base_url}{endpoint}"
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            raise Exception(f"Bitget API error: {response.text}")
+        
+        return response.json()
+
+    def get_futures_records(self, start_time: int, end_time: int, limit: int = 100) -> Dict:
+        """
+        Get futures transaction records
+        
+        Args:
+            start_time (int): Start time in milliseconds
+            end_time (int): End time in milliseconds (max 30 days from start_time)
+            limit (int): Maximum number of records to return (default: 100, max: 500)
+        
+        Returns:
+            Dict containing futures transaction records
+        """
+        endpoint = "/api/v2/tax/future-record"
+        method = "GET"
+        timestamp = str(int(time.time() * 1000))
+        
+        # Build query string
+        query_params = f"?startTime={start_time}&endTime={end_time}&limit={limit}"
+        
+        signature = self._generate_signature(timestamp, method, endpoint + query_params)
+        
+        headers = {
+            "ACCESS-KEY": self.api_key,
+            "ACCESS-SIGN": signature,
+            "ACCESS-TIMESTAMP": timestamp,
+            "ACCESS-PASSPHRASE": self.passphrase,
+            "Content-Type": "application/json",
+            "locale": "en-US"
+        }
+        
+        url = f"{self.base_url}{endpoint}{query_params}"
+        response = requests.get(url, headers=headers)
+        
+        if response.status_code != 200:
+            raise Exception(f"Bitget API error: {response.text}")
+        
+        return response.json()
+
+    
     def get_balances(self) -> List[Dict]:
         """Get all non-zero balances from Bitget account"""
         account_info = self.get_account_assets()
@@ -69,7 +138,7 @@ class BitgetConnector(ExchangeConnector):
         
         portfolio = []
         total_value = 0.0
-        
+    
         if account_info.get("code") == "00000" and "data" in account_info:
             for asset in account_info["data"]:
                 symbol = asset.get("coinName", "")
@@ -87,10 +156,11 @@ class BitgetConnector(ExchangeConnector):
         connection_info = self.get_connection_info()
         
         return {
-            "address": f"Bitget: {connection_info['api_key']}",
+            "connection_id": f"Bitget: {connection_info['api_key']}",  # address yerine connection_id
             "holdings_usd": round(total_value, 2),
             "token_breakdown": sorted(portfolio, key=lambda x: x["usd_value"], reverse=True)
         }
+    
     
     def get_connection_info(self) -> Dict:
         """Override to include passphrase info (masked)"""
