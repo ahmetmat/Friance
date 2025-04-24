@@ -14,17 +14,62 @@ def fetch_market_data() -> dict:
         "sparkline": "false",
         "price_change_percentage": "24h"
     }
-    coins = requests.get(url, params=params).json()
-    sorted_by_change = sorted(coins, key=lambda c: c.get("price_change_percentage_24h", 0) or 0)
-    gainers = sorted_by_change[-5:][::-1]
-    losers = sorted_by_change[:5]
-    btc = next((c for c in coins if c['id'] == 'bitcoin'), None)
-    btc_pct = btc['price_change_percentage_24h'] if btc else 0.0
-    return {
-        "gainers": [{"symbol": c["symbol"], "change": round(c["price_change_percentage_24h"],2)} for c in gainers],
-        "losers": [{"symbol": c["symbol"], "change": round(c["price_change_percentage_24h"],2)} for c in losers],
-        "btc_pct": round(btc_pct,2)
-    }
+    
+    try:
+        response = requests.get(url, params=params)
+        
+        # Check if the response is valid
+        if response.status_code != 200:
+            print(f"Error fetching market data: Status code {response.status_code}")
+            # Return a default structure instead of raising an error
+            return {
+                "gainers": [],
+                "losers": [],
+                "btc_pct": 0
+            }
+        
+        # Parse the JSON response
+        try:
+            coins = response.json()
+            
+            # Check if coins is a list as expected
+            if not isinstance(coins, list):
+                print(f"Unexpected response format: {type(coins)}")
+                print(f"Response content: {coins}")
+                return {
+                    "gainers": [],
+                    "losers": [],
+                    "btc_pct": 0
+                }
+                
+            # Original processing code
+            sorted_by_change = sorted(coins, key=lambda c: c.get("price_change_percentage_24h", 0) or 0)
+            gainers = sorted_by_change[-5:][::-1]
+            losers = sorted_by_change[:5]
+            btc = next((c for c in coins if c['id'] == 'bitcoin'), None)
+            btc_pct = btc['price_change_percentage_24h'] if btc else 0.0
+            
+            return {
+                "gainers": [{"symbol": c["symbol"], "change": round(c["price_change_percentage_24h"],2)} for c in gainers],
+                "losers": [{"symbol": c["symbol"], "change": round(c["price_change_percentage_24h"],2)} for c in losers],
+                "btc_pct": round(btc_pct,2)
+            }
+        except json.JSONDecodeError:
+            print(f"Error parsing JSON response: {response.text}")
+            return {
+                "gainers": [],
+                "losers": [],
+                "btc_pct": 0
+            }
+    
+    except Exception as e:
+        print(f"Error in fetch_market_data: {str(e)}")
+        # Return a default structure
+        return {
+            "gainers": [],
+            "losers": [],
+            "btc_pct": 0
+        }
 
 # NewsAPI headlines
 

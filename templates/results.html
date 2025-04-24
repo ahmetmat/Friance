@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Investment Analysis Results</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Analysis Results</h1>
+      <p class="subtitle">Your personalized crypto investment insights</p>
+    </header>
+    
+    <div class="results-container active" id="results">
+      <div class="card" id="market-summary-card">
+        <div class="card-header">
+          <div class="card-icon market-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3 class="card-title">Market Summary</h3>
+        </div>
+        
+        <div class="btc-update">
+          <div class="btc-icon">
+            <i class="fab fa-bitcoin"></i>
+          </div>
+          <div class="btc-text">
+            Bitcoin is <span id="btc-direction">up</span> <span id="btc-pct" class="gain">0%</span> today
+          </div>
+        </div>
+        
+        <div class="market-columns">
+          <div class="market-column">
+            <h4><i class="fas fa-arrow-up"></i> Top Gainers</h4>
+            <ul class="coin-list" id="gainers-list">
+              <!-- Will be populated dynamically -->
+            </ul>
+          </div>
+          
+          <div class="market-column">
+            <h4><i class="fas fa-arrow-down"></i> Top Losers</h4>
+            <ul class="coin-list" id="losers-list">
+              <!-- Will be populated dynamically -->
+            </ul>
+          </div>
+        </div>
+        
+        <p class="summary-text" id="market-summary"></p>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon portfolio-icon">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <h3 class="card-title">Portfolio Recommendation</h3>
+        </div>
+        
+        <div class="strategy-card">
+          <div class="strategy-title">
+            <i class="fas fa-lightbulb"></i> Strategy
+          </div>
+          <p id="strategy-text"></p>
+        </div>
+        
+        <ul class="recommendation-list" id="recommendation-list">
+          <!-- Will be populated dynamically -->
+        </ul>
+      </div>
+      
+      <div class="card" id="wallet-card">
+        <div class="card-header">
+          <div class="card-icon wallet-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <h3 class="card-title">Wallet Analysis</h3>
+        </div>
+        
+        <div class="wallet-info">
+          <div class="info-row">
+            <span class="info-label">Account Address/ID:</span>
+            <span class="info-value address-value" id="wallet-address"></span>
+          </div>
+          
+          <div class="info-row">
+            <span class="info-label">Total Holdings (USD):</span>
+            <span class="info-value" id="holdings-value">$0.00</span>
+          </div>
+          
+          <div>
+            <span class="info-label">Token Breakdown:</span>
+            <div id="token-list">
+              <!-- Will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn btn-primary restart-btn" onclick="location.href='/'">
+        <i class="fas fa-redo"></i> Start New Analysis
+      </button>
+    </div>
+  </div>
+  
+  <script>
+    // When the page loads, parse URL parameters and fetch results
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get analysis ID from URL if available
+      const urlParams = new URLSearchParams(window.location.search);
+      const analysisId = urlParams.get('id');
+      
+      if (analysisId) {
+        // Fetch results with the analysis ID
+        fetchResults(analysisId);
+      } else {
+        // No ID provided, show message
+        document.getElementById('results').innerHTML = `
+          <div class="card">
+            <h3 class="card-title">No Analysis Results</h3>
+            <p>No analysis ID was provided. Please return to the home page and start a new analysis.</p>
+            <button class="btn btn-primary restart-btn" onclick="location.href='/'">
+              <i class="fas fa-home"></i> Return to Home
+            </button>
+          </div>
+        `;
+      }
+    });
+    
+    // Function to fetch results by ID
+    function fetchResults(id) {
+      // Show loading indicator
+      showLoading();
+      
+      // Fetch results from the server
+      fetch(`/results/${id}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Results not found');
+          }
+          return response.json();
+        })
+        .then(data => {
+          // Populate the UI with the data
+          populateResults(data);
+          hideLoading();
+        })
+        .catch(error => {
+          hideLoading();
+          document.getElementById('results').innerHTML = `
+            <div class="card">
+              <h3 class="card-title">Error</h3>
+              <p>Failed to load analysis results: ${error.message}</p>
+              <button class="btn btn-primary restart-btn" onclick="location.href='/'">
+                <i class="fas fa-home"></i> Return to Home
+              </button>
+            </div>
+          `;
+        });
+    }
+    
+    // Show loading indicator
+    function showLoading() {
+      const loadingEl = document.createElement('div');
+      loadingEl.classList.add('loading-container');
+      loadingEl.id = 'loading-indicator';
+      loadingEl.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>Loading analysis results...</p>
+      `;
+      document.body.appendChild(loadingEl);
+    }
+    
+    // Hide loading indicator
+    function hideLoading() {
+      const loadingEl = document.getElementById('loading-indicator');
+      if (loadingEl) {
+        loadingEl.remove();
+      }
+    }
+    
+    // Function to populate results with data
+    function populateResults(data) {
+      // Market Summary
+      if (data.market_summary) {
+        // Update BTC percentage
+        const btcPct = data.market_summary.btc_pct || 0;
+        document.getElementById('btc-pct').textContent = `${btcPct}%`;
+        
+        // Update class based on positive/negative value
+        if (btcPct >= 0) {
+          document.getElementById('btc-pct').classList.add('gain');
+          document.getElementById('btc-pct').classList.remove('loss');
+          document.getElementById('btc-direction').textContent = 'up';
+        } else {
+          document.getElementById('btc-pct').classList.add('loss');
+          document.getElementById('btc-pct').classList.remove('gain');
+          document.getElementById('btc-direction').textContent = 'down';
+        }
+        
+        // Populate gainers
+        const gainersList = document.getElementById('gainers-list');
+        data.market_summary.gainers.forEach(coin => {
+          const li = document.createElement('li');
+          li.classList.add('coin-item');
+          li.innerHTML = `
+            <span class="coin-symbol">${coin.symbol.toUpperCase()}</span>
+            <span class="gain">+${coin.change}%</span>
+          `;
+          gainersList.appendChild(li);
+        });
+        
+        // Populate losers
+        const losersList = document.getElementById('losers-list');
+        data.market_summary.losers.forEach(coin => {
+          const li = document.createElement('li');
+          li.classList.add('coin-item');
+          li.innerHTML = `
+            <span class="coin-symbol">${coin.symbol.toUpperCase()}</span>
+            <span class="loss">${coin.change}%</span>
+          `;
+          losersList.appendChild(li);
+        });
+        
+        // Update summary text
+        document.getElementById('market-summary').textContent = data.market_summary.summary;
+      }
+      
+      // Portfolio Recommendation
+      if (data.portfolio_recommendation) {
+        // Update strategy text
+        document.getElementById('strategy-text').textContent = data.portfolio_recommendation.strategy;
+        
+        // Populate recommendation list
+        const recommendationList = document.getElementById('recommendation-list');
+        
+        // Clear existing recommendations
+        recommendationList.innerHTML = '';
+        
+        // Add recommended allocations
+        data.portfolio_recommendation.recommended.forEach(rec => {
+          const li = document.createElement('li');
+          li.classList.add('recommendation-item');
+          li.innerHTML = `
+            <div class="recommendation-header">
+              <span class="coin-tag">${rec.symbol.toUpperCase()}</span>
+              <span class="allocation">${rec.alloc_pct}%</span>
+            </div>
+            <p class="recommendation-reason">${rec.reason}</p>
+          `;
+          recommendationList.appendChild(li);
+        });
+        
+        // Existing holdings recommendations
+        if (data.portfolio_recommendation.existing_holdings && 
+            data.portfolio_recommendation.existing_holdings.length > 0) {
+          
+          const holdingsTitle = document.createElement('h4');
+          holdingsTitle.innerHTML = '<i class="fas fa-exchange-alt"></i> Actions for Your Current Holdings';
+          holdingsTitle.className = 'mt-4 mb-2';
+          recommendationList.appendChild(holdingsTitle);
+          
+          data.portfolio_recommendation.existing_holdings.forEach(holding => {
+            const li = document.createElement('li');
+            li.classList.add('recommendation-item');
+            
+            // Define color based on action
+            let actionClass = 'text-primary';
+            if (holding.action === 'SELL') actionClass = 'text-danger';
+            if (holding.action === 'REDUCE') actionClass = 'text-warning';
+            if (holding.action === 'KEEP') actionClass = 'text-success';
+            
+            li.innerHTML = `
+              <div class="recommendation-header">
+                <span class="coin-tag">${holding.symbol.toUpperCase()}</span>
+                <span class="action ${actionClass}">${holding.action}</span>
+              </div>
+              <p class="recommendation-reason">${holding.reason}</p>
+            `;
+            recommendationList.appendChild(li);
+          });
+        }
+        
+        // New investment opportunities
+        if (data.portfolio_recommendation.new_investments && 
+            data.portfolio_recommendation.new_investments.length > 0) {
+          
+          const newInvestTitle = document.createElement('h4');
+          newInvestTitle.innerHTML = '<i class="fas fa-lightbulb"></i> New Investment Opportunities';
+          newInvestTitle.className = 'mt-4 mb-2';
+          recommendationList.appendChild(newInvestTitle);
+          
+          data.portfolio_recommendation.new_investments.forEach(investment => {
+            const li = document.createElement('li');
+            li.classList.add('recommendation-item');
+            li.innerHTML = `
+              <div class="recommendation-header">
+                <span class="coin-tag">${investment.symbol.toUpperCase()}</span>
+                <span class="action text-success">BUY</span>
+              </div>
+              <p class="recommendation-reason">${investment.reason}</p>
+            `;
+            recommendationList.appendChild(li);
+          });
+        }
+      }
+      
+      // Wallet Analysis
+      if (data.wallet_analysis) {
+        // Show wallet card
+        document.getElementById('wallet-card').style.display = 'block';
+        
+        // Update wallet address
+        document.getElementById('wallet-address').textContent = data.wallet_analysis.address;
+        
+        // Update holdings value
+        const holdingsUsd = data.wallet_analysis.holdings_usd;
+        document.getElementById('holdings-value').textContent = 
+          `$${holdingsUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        // Update token list
+        const tokenList = document.getElementById('token-list');
+        
+        data.wallet_analysis.token_breakdown.forEach(token => {
+          const div = document.createElement('div');
+          div.classList.add('token-item');
+          
+          // Choose icon class based on token
+          let iconClass = 'fab fa-ethereum';
+          if (token.symbol.toUpperCase() === 'BTC') iconClass = 'fab fa-bitcoin';
+          else if (['USDT', 'USDC', 'DAI', 'BUSD'].includes(token.symbol.toUpperCase())) 
+            iconClass = 'fas fa-dollar-sign';
+          
+          div.innerHTML = `
+            <div class="token-icon">
+              <i class="${iconClass}"></i>
+            </div>
+            <div class="token-details">
+              <div class="token-symbol">${token.symbol}</div>
+              <div class="token-amount">${token.amount.toFixed(6)} ${token.symbol}</div>
+            </div>
+            <div class="token-value">$${token.usd_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+          `;
+          tokenList.appendChild(div);
+        });
+      } else {
+        // Hide wallet card if no wallet analysis data
+        document.getElementById('wallet-card').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

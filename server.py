@@ -1,20 +1,24 @@
 from flask import Flask, request, jsonify, render_template, Response
-import json, os
+import json, os, uuid
+from dotenv import load_dotenv
 from marketsweep.exchange import BinanceConnector, BitgetConnector, EthereumWalletConnector
 
 app = Flask(__name__)
 PROFILE_PATH = os.path.join(os.path.dirname(__file__), "marketsweep", "user_profile.json")
+RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
+if not os.path.exists(RESULTS_DIR):
+    os.makedirs(RESULTS_DIR)
 
 @app.route('/', methods=['GET'])
 def root():
     return render_template("index.html")
 @app.after_request
 def add_security_headers(response):
-    # CSP başlığını tanımla - API yanıtlarını etkilemeyecek şekilde
+    # CSP header with unsafe-inline to allow inline scripts
     if response.mimetype == 'text/html':
         csp = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-eval' https://cdnjs.cloudflare.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; "
             "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
             "img-src 'self' data:; "
             "font-src 'self' https://cdnjs.cloudflare.com; "
@@ -94,7 +98,7 @@ def analyze():
                 "message": f"Failed to fetch wallet/exchange data: {str(e)}"
             }), 400
 
-        print(f"Successfully retrieved wallet data: {wallet.get('holdings_usd')} USD")
+        print(f"Successfully retrieved wallet data: {wallet.get('holdings_usd') if wallet else 'None'} USD")
         profile = data.get('profile')  # user profile from request
 
         # Analyze wallet performance (detect profit/loss)
@@ -147,7 +151,18 @@ def analyze():
             'wallet_analysis': wallet
         }
         
-        print("Analysis complete, returning results")
+        # Generate a unique ID for this analysis result
+        analysis_id = str(uuid.uuid4())
+        
+        # Save the result to a file for later retrieval
+        result_path = os.path.join(RESULTS_DIR, f"{analysis_id}.json")
+        with open(result_path, 'w', encoding='utf-8') as f:
+            json.dump(result, f)
+        
+        print(f"Analysis complete, saved as {analysis_id}")
+        
+        # Return the result along with the generated ID
+        result['id'] = analysis_id
         return jsonify(result)
     except Exception as e:
         import traceback
@@ -156,6 +171,26 @@ def analyze():
         return jsonify({
             "status": "error",
             "message": f"An unexpected error occurred: {str(e)}"
+        }), 500
+
+@app.route("/results/<analysis_id>", methods=["GET"])
+def get_results(analysis_id):
+    """Retrieve previously saved analysis results"""
+    try:
+        # Check if the results file exists
+        result_path = os.path.join(RESULTS_DIR, f"{analysis_id}.json")
+        if not os.path.exists(result_path):
+            return jsonify({"status": "error", "message": "Analysis results not found"}), 404
+        
+        # Read and return the results
+        with open(result_path, 'r', encoding='utf-8') as f:
+            result = json.load(f)
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Error retrieving results: {str(e)}"
         }), 500
     
 if __name__ == '__main__':

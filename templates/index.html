@@ -6,6 +6,216 @@
   <title>Crypto Investor Copilot</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/selection.css">  <style>
+    :root {
+      --primary: #3a86ff;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --dark: #1e293b;
+      --light: #f8fafc;
+      --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    body {
+      background-color: #f3f4f6;
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+      background: linear-gradient(to right, #3a86ff, #22c55e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: #64748b;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, var(--primary), var(--success));
+    }
+    
+    .card-icon {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+      background: #e0f2fe;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+    
+    .card-description {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+    
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .tag {
+      background-color: #e0f2fe;
+      color: var(--primary);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+    }
+    
+    .card-cta {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .card-cta:hover {
+      background-color: #2563eb;
+    }
+    
+    /* Form container will initially be hidden */
+    #form-container {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Loading effect */
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(58, 134, 255, 0.4);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(58, 134, 255, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(58, 134, 255, 0);
+      }
+    }
+    
+    /* Dark mode support */
+    body.dark-theme {
+      background-color: #111827;
+      color: #f9fafb;
+    }
+    
+    body.dark-theme .card {
+      background-color: #1f2937;
+      color: #f9fafb;
+    }
+    
+    body.dark-theme .card-title {
+      color: #f9fafb;
+    }
+    
+    body.dark-theme .card-description {
+      color: #d1d5db;
+    }
+    
+    body.dark-theme .card-icon {
+      background-color: #374151;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -14,230 +224,461 @@
       <p class="subtitle">Your personalized assistant for data-driven cryptocurrency investment decisions</p>
     </header>
     
-    <div class="progress-container">
-      <div class="progress-bar" id="progress-bar"></div>
-      <div class="step-circle active">1</div>
-      <div class="step-circle">2</div>
-      <div class="step-circle">3</div>
+    <!-- Selection Cards -->
+    <div class="cards-container" id="selection-cards">
+      <div class="card" id="market-analysis-card">
+        <div class="card-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3 class="card-title">Market Analysis</h3>
+        <p class="card-description">Get a comprehensive overview of current market trends, top gainers, losers, and expert insights without sharing personal details.</p>
+        <div class="card-tags">
+          <span class="tag">No Personal Data</span>
+          <span class="tag">Quick Analysis</span>
+        </div>
+        <button class="card-cta" onclick="selectOption('market-analysis')">
+          Get Market Overview <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+      
+      <div class="card" id="portfolio-analysis-card">
+        <div class="card-icon" style="color: #f59e0b; background: #fef3c7;">
+          <i class="fas fa-wallet"></i>
+        </div>
+        <h3 class="card-title">Portfolio Analysis</h3>
+        <p class="card-description">Analyze your existing crypto holdings, track performance, and get recommendations to optimize your current investments.</p>
+        <div class="card-tags">
+          <span class="tag" style="background: #fef3c7; color: #d97706;">Wallet Connection</span>
+          <span class="tag" style="background: #fef3c7; color: #d97706;">Performance Tracking</span>
+        </div>
+        <button class="card-cta" style="background: #f59e0b;" onclick="selectOption('portfolio-analysis')">
+          Analyze My Portfolio <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+      
+      <div class="card" id="investment-recommendations-card">
+        <div class="card-icon" style="color: #22c55e; background: #dcfce7;">
+          <i class="fas fa-lightbulb"></i>
+        </div>
+        <h3 class="card-title">Investment Recommendations</h3>
+        <p class="card-description">Set your budget and preferences to receive personalized investment recommendations tailored to your risk profile and goals.</p>
+        <div class="card-tags">
+          <span class="tag" style="background: #dcfce7; color: #16a34a;">Personalized</span>
+          <span class="tag" style="background: #dcfce7; color: #16a34a;">Budget-based</span>
+        </div>
+        <button class="card-cta" style="background: #22c55e;" onclick="selectOption('investment-recommendations')">
+          Get Recommendations <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
     </div>
     
-    <form id="investor-form">
-      <!-- Step 1: Personal Information -->
-      <div class="form-step active" id="step1">
-        <div class="step-header">
-          <div class="step-number">1</div>
-          <h2 class="step-title">Personal Information</h2>
-        </div>
-        <div class="form-group">
-          <label for="name">Your Name</label>
-          <input type="text" id="name" placeholder="John Doe" required>
-        </div>
-        <div class="form-group">
-          <label for="budget">Investment Budget (USD)</label>
-          <input type="number" id="budget" placeholder="5000" min="100" required>
-        </div>
-        <div class="btn-container">
-          <div></div> <!-- Empty div for spacing -->
-          <button type="button" class="btn btn-primary" id="next1">Continue <i class="fas fa-arrow-right"></i></button>
-        </div>
-      </div>
+    <!-- Form container will be shown after selection -->
+    <div id="form-container"></div>
+  </div>
+  
+  <script>
+    // Function to handle option selection
+    function selectOption(option) {
+      // Apply pulse animation to selected card
+      document.getElementById(`${option}-card`).classList.add('pulse');
       
-      <!-- Step 2: Investment Preferences -->
-      <div class="form-step" id="step2">
-        <div class="step-header">
-          <div class="step-number">2</div>
-          <h2 class="step-title">Investment Preferences</h2>
-        </div>
-        <div class="form-group">
-          <label for="risk">Risk Tolerance</label>
-          <select id="risk" required>
-            <option value="low">Low - Safety First</option>
-            <option value="medium" selected>Medium - Balanced Approach</option>
-            <option value="high">High - Maximum Growth</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Investment Interests</label>
-          <div class="tags-input-container" id="tags-container">
-            <input type="text" class="tags-input" id="tags-input" placeholder="Type and press Enter (e.g. AI, DeFi, Web3)">
-          </div>
-        </div>
-        <div class="btn-container">
-          <button type="button" class="btn btn-outline" id="prev2"><i class="fas fa-arrow-left"></i> Back</button>
-          <button type="button" class="btn btn-primary" id="next2">Continue <i class="fas fa-arrow-right"></i></button>
-        </div>
-      </div>
+      // Hide all cards with fade effect
+      const cardsContainer = document.getElementById('selection-cards');
+      cardsContainer.style.opacity = '0';
+      cardsContainer.style.transition = 'opacity 0.5s ease';
       
-      <!-- Step 3: Wallet Information -->
-      <div class="form-step" id="step3">
-        <div class="step-header">
-          <div class="step-number">3</div>
-          <h2 class="step-title">Wallet Information</h2>
-        </div>
-
-        <div class="form-group">
-          <label for="connection_type">Connection Type</label>
-          <select id="connection_type" required>
-            <option value="wallet">Ethereum Wallet Address</option>
-            <option value="binance">Binance Account</option>
-            <option value="bitget">Bitget Account</option>
-          </select>
-        </div>
+      setTimeout(() => {
+        cardsContainer.style.display = 'none';
         
-        <!-- Ethereum Wallet Fields -->
-        <div id="wallet_fields">
-          <div class="form-group">
-            <label for="wallet_address">Wallet Address</label>
-            <input type="text" id="wallet_address" placeholder="0x94845333028B1204Fbe14E1278Fd4Adde46B22ce">
-          </div>
-          
-        </div>
+        // Show form container
+        const formContainer = document.getElementById('form-container');
+        formContainer.style.display = 'block';
         
-        <!-- Binance Fields -->
-        <div id="binance_fields" style="display:none;">
-          <div class="form-group">
-            <label for="binance_api_key">Binance API Key</label>
-            <input type="text" id="binance_api_key" placeholder="Your Binance API Key">
-          </div>
-          <div class="form-group">
-            <label for="binance_secret">Binance Secret Key</label>
-            <input type="password" id="binance_secret" placeholder="Your Binance Secret Key">
-            <small class="help-text">* We recommend using API keys with read-only permissions</small>
-          </div>
-        </div>
-        
-        <!-- Bitget Fields -->
-        <div id="bitget_fields" style="display:none;">
-          <div class="form-group">
-            <label for="bitget_api_key">Bitget API Key</label>
-            <input type="text" id="bitget_api_key" placeholder="Your Bitget API Key">
-          </div>
-          <div class="form-group">
-            <label for="bitget_secret">Bitget Secret Key</label>
-            <input type="password" id="bitget_secret" placeholder="Your Bitget Secret Key">
-          </div>
-          <div class="form-group">
-            <label for="bitget_passphrase">Bitget Passphrase</label>
-            <input type="password" id="bitget_passphrase" placeholder="Your Bitget Passphrase">
-            <small class="help-text">* We recommend using API keys with read-only permissions</small>
-          </div>
-        </div>
-        
-        <div class="btn-container">
-          <button type="button" class="btn btn-outline" id="prev3"><i class="fas fa-arrow-left"></i> Back</button>
-          <button type="submit" class="btn btn-primary" id="analyze"><i class="fas fa-chart-line"></i> Analyze Portfolio</button>
-        </div>
-      </div>
-    </form>
+        // Load appropriate form based on selection
+        loadForm(option);
+      }, 500);
+    }
     
-    <!-- Results Page -->
-    <div class="results-container" id="results">
-      <!-- Market Summary Card -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon market-icon">
-            <i class="fas fa-chart-line"></i>
-          </div>
-          <h3 class="card-title">Market Summary</h3>
-        </div>
-        
-        <div class="btc-update">
-          <div class="btc-icon">
-            <i class="fab fa-bitcoin"></i>
-          </div>
-          <div class="btc-text">Bitcoin is up <span class="gain" id="btc-pct">3.53%</span> today</div>
-        </div>
-        
-        <div class="market-columns">
-          <div class="market-column">
-            <h4><i class="fas fa-arrow-up"></i> Top Gainers</h4>
-            <ul class="coin-list" id="gainers-list">
-              <!-- Will be populated by JS -->
-            </ul>
-          </div>
-          
-          <div class="market-column">
-            <h4><i class="fas fa-arrow-down"></i> Top Losers</h4>
-            <ul class="coin-list" id="losers-list">
-              <!-- Will be populated by JS -->
-            </ul>
-          </div>
-        </div>
-        
-        <p class="summary-text" id="market-summary">
-          <!-- Will be populated by JS -->
-        </p>
-      </div>
+    // Function to load appropriate form based on selection
+    function loadForm(option) {
+      const formContainer = document.getElementById('form-container');
       
-      <!-- Portfolio Recommendation Card -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon portfolio-icon">
-            <i class="fas fa-briefcase"></i>
-          </div>
-          <h3 class="card-title">Portfolio Recommendation</h3>
-        </div>
-        
-        <div class="strategy-card">
-          <div class="strategy-title">
-            <i class="fas fa-chess"></i> Strategy
-          </div>
-          <p id="strategy-text"><!-- Will be populated by JS --></p>
-        </div>
-        
-        <ul class="recommendation-list" id="recommendation-list">
-          <!-- Will be populated by JS -->
-        </ul>
-      </div>
-      
-      <!-- Wallet Analysis Card -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon wallet-icon">
-            <i class="fas fa-wallet"></i>
-          </div>
-          <h3 class="card-title">Wallet Analysis</h3>
-        </div>
-        
-        <div class="wallet-info">
-          <div class="info-row">
-            <span class="info-label">Account Address/ID:</span>
-            <span class="info-value address-value" id="wallet-address"></span>
-          </div>
-          
-          <div class="info-row">
-            <span class="info-label">Total Holdings (USD):</span>
-            <span class="info-value" id="holdings-value"></span>
-          </div>
-          
-          <div>
-            <div class="info-label">Token Breakdown:</div>
-            <div id="token-list">
-              <!-- Will be populated by JS -->
+      switch(option) {
+        case 'market-analysis':
+          // For market analysis, we'll show a simple form with just a button
+          formContainer.innerHTML = `
+            <div class="card">
+              <h3 class="card-title">Market Analysis</h3>
+              <p class="card-description">Our AI will analyze current market conditions and provide you with insights.</p>
+              <button class="card-cta" onclick="submitMarketAnalysis()">
+                Start Analysis <i class="fas fa-chart-bar"></i>
+              </button>
             </div>
-          </div>
-          div class="info-row">
-  <span class="info-label">Performance Time Period:</span>
-  <div class="time-period-selector">
-    <button class="time-period-btn" data-period="1d">1D</button>
-    <button class="time-period-btn active" data-period="7d">1W</button>
-    <button class="time-period-btn" data-period="30d">1M</button>
-    <button class="time-period-btn" data-period="90d">3M</button>
-    <button class="time-period-btn" data-period="180d">6M</button>
-    <button class="time-period-btn" data-period="365d">1Y</button>
-  </div>
-</div>
-        </div>
-      </div>
+          `;
+          break;
+          
+        case 'portfolio-analysis':
+          // For portfolio analysis, we need wallet connection info
+          formContainer.innerHTML = `
+            <div class="card">
+              <h3 class="card-title">Connect Your Wallet</h3>
+              <p class="card-description">Provide your wallet address to analyze your current holdings.</p>
+              
+              <div style="width: 100%; margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Connection Type</label>
+                <select id="connection_type" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+                  <option value="wallet">Ethereum Wallet Address</option>
+                  <option value="binance">Binance Account</option>
+                  <option value="bitget">Bitget Account</option>
+                </select>
+              </div>
+              
+              <div id="wallet_fields" style="width: 100%; margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Wallet Address</label>
+                <input type="text" id="wallet_address" placeholder="0x94845333028B1204Fbe14E1278Fd4Adde46B22ce" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+              </div>
+              
+              <button class="card-cta" style="background: #f59e0b;" onclick="submitPortfolioAnalysis()">
+                Analyze My Portfolio <i class="fas fa-search-dollar"></i>
+              </button>
+            </div>
+          `;
+          // Add event listener to toggle fields based on connection type
+          document.getElementById('connection_type').addEventListener('change', toggleConnectionFields);
+          break;
+          
+        case 'investment-recommendations':
+          // For investment recommendations, we need budget and profile info
+          formContainer.innerHTML = `
+            <div class="card">
+              <h3 class="card-title">Investment Profile</h3>
+              <p class="card-description">Tell us about your investment goals so we can provide personalized recommendations.</p>
+              
+              <div style="width: 100%; margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Your Name</label>
+                <input type="text" id="name" placeholder="John Doe" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+              </div>
+              
+              <div style="width: 100%; margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Investment Budget (USD)</label>
+                <input type="number" id="budget" placeholder="5000" min="100" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+              </div>
+              
+              <div style="width: 100%; margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Risk Tolerance</label>
+                <select id="risk" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+                  <option value="low">Low - Safety First</option>
+                  <option value="medium" selected>Medium - Balanced Approach</option>
+                  <option value="high">High - Maximum Growth</option>
+                </select>
+              </div>
+              
+              <div style="width: 100%; margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Investment Interests</label>
+                <div class="tags-input-container" id="tags-container" style="border: 1px solid #d1d5db; padding: 0.5rem; border-radius: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                  <input type="text" class="tags-input" id="tags-input" placeholder="Type and press Enter (e.g. AI, DeFi, Web3)" style="flex: 1; border: none; outline: none; padding: 0.25rem; min-width: 150px;">
+                </div>
+              </div>
+              
+              <button class="card-cta" style="background: #22c55e;" onclick="submitInvestmentRecommendations()">
+                Get Recommendations <i class="fas fa-chart-pie"></i>
+              </button>
+            </div>
+          `;
+          // Initialize tags input
+          initializeTagsInput();
+          break;
+      }
+    }
+    
+    // Function to toggle connection fields based on selected type
+    function toggleConnectionFields() {
+      const connectionType = document.getElementById('connection_type').value;
+      const walletFields = document.getElementById('wallet_fields');
       
-      <button class="btn btn-outline restart-btn" id="restart">
-        <i class="fas fa-redo"></i> Start New Analysis
-      </button>
-    </div>
-  </div>
-
-  <!-- Load scripts -->
+      // Remove any existing exchange-specific fields
+      const existingExchangeFields = document.getElementById('exchange_fields');
+      if (existingExchangeFields) {
+        existingExchangeFields.remove();
+      }
+      
+      // Show/hide wallet fields
+      if (connectionType === 'wallet') {
+        walletFields.style.display = 'block';
+      } else {
+        walletFields.style.display = 'none';
+        
+        // Create and add exchange fields
+        const exchangeFields = document.createElement('div');
+        exchangeFields.id = 'exchange_fields';
+        exchangeFields.style.width = '100%';
+        exchangeFields.style.marginBottom = '1.5rem';
+        
+        if (connectionType === 'binance') {
+          exchangeFields.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Binance API Key</label>
+              <input type="text" id="binance_api_key" placeholder="Your Binance API Key" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Binance Secret Key</label>
+              <input type="password" id="binance_secret" placeholder="Your Binance Secret Key" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+              <small style="display: block; margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;">* We recommend using API keys with read-only permissions</small>
+            </div>
+          `;
+        } else if (connectionType === 'bitget') {
+          exchangeFields.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Bitget API Key</label>
+              <input type="text" id="bitget_api_key" placeholder="Your Bitget API Key" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+              <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Bitget Secret Key</label>
+              <input type="password" id="bitget_secret" placeholder="Your Bitget Secret Key" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; text-align: left; font-weight: 500;">Bitget Passphrase</label>
+              <input type="password" id="bitget_passphrase" placeholder="Your Bitget Passphrase" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;">
+              <small style="display: block; margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;">* We recommend using API keys with read-only permissions</small>
+            </div>
+          `;
+        }
+        
+        // Insert exchange fields after wallet fields
+        walletFields.parentNode.insertBefore(exchangeFields, walletFields.nextSibling);
+      }
+    }
+    
+    // Function to initialize tags input
+    function initializeTagsInput() {
+      const tagsContainer = document.getElementById('tags-container');
+      const tagsInput = document.getElementById('tags-input');
+      
+      if (!tagsContainer || !tagsInput) return;
+      
+      // Add default tags
+      ['AI', 'DeFi', 'Web3'].forEach(tag => {
+        addTag(tag);
+      });
+      
+      // Event listener for adding new tags
+      tagsInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && tagsInput.value.trim() !== '') {
+          e.preventDefault();
+          const tag = tagsInput.value.trim();
+          addTag(tag);
+          tagsInput.value = '';
+        }
+      });
+    }
+    
+    // Function to add a tag
+    function addTag(tag) {
+      const tagsContainer = document.getElementById('tags-container');
+      const tagsInput = document.getElementById('tags-input');
+      
+      if (!tagsContainer || !tagsInput) return;
+      
+      const tagElement = document.createElement('div');
+      tagElement.classList.add('tag-item');
+      tagElement.style.backgroundColor = '#e0f2fe';
+      tagElement.style.color = '#0284c7';
+      tagElement.style.padding = '0.25rem 0.5rem';
+      tagElement.style.borderRadius = '0.25rem';
+      tagElement.style.display = 'flex';
+      tagElement.style.alignItems = 'center';
+      
+      tagElement.innerHTML = `
+        ${tag}
+        <span style="margin-left: 0.5rem; cursor: pointer;">&times;</span>
+      `;
+      
+      tagElement.querySelector('span').addEventListener('click', () => {
+        tagElement.remove();
+      });
+      
+      tagsContainer.insertBefore(tagElement, tagsInput);
+    }
+    
+    // Submit handlers for each form type
+    function submitMarketAnalysis() {
+      // For market analysis, we can proceed directly to analysis
+      showLoadingIndicator();
+      
+      // Simulate sending a request with minimal data
+      const data = {
+        connection_type: "none",
+        profile: {
+          type: "market_analysis_only"
+        }
+      };
+      
+      // Send to server or use sample data
+      simulateAnalysis(data);
+    }
+    
+    function submitPortfolioAnalysis() {
+      // Validate wallet information
+      const connectionType = document.getElementById('connection_type').value;
+      
+      if (connectionType === 'wallet') {
+        const walletAddress = document.getElementById('wallet_address').value;
+        if (!walletAddress) {
+          alert('Please enter your wallet address.');
+          return;
+        }
+      } else if (connectionType === 'binance') {
+        const binanceApiKey = document.getElementById('binance_api_key').value;
+        const binanceSecret = document.getElementById('binance_secret').value;
+        if (!binanceApiKey || !binanceSecret) {
+          alert('Please enter your Binance API key and secret key.');
+          return;
+        }
+      } else if (connectionType === 'bitget') {
+        const bitgetApiKey = document.getElementById('bitget_api_key').value;
+        const bitgetSecret = document.getElementById('bitget_secret').value;
+        const bitgetPassphrase = document.getElementById('bitget_passphrase').value;
+        if (!bitgetApiKey || !bitgetSecret || !bitgetPassphrase) {
+          alert('Please enter your Bitget API key, secret key, and passphrase.');
+          return;
+        }
+      }
+      
+      // Show loading indicator
+      showLoadingIndicator();
+      
+      // Collect form data
+      const data = collectPortfolioData();
+      
+      // Send to server or use sample data
+      simulateAnalysis(data);
+    }
+    
+    function submitInvestmentRecommendations() {
+      // Validate investment profile
+      const name = document.getElementById('name').value;
+      const budget = document.getElementById('budget').value;
+      
+      if (!name || !budget) {
+        alert('Please fill in your name and budget.');
+        return;
+      }
+      
+      // Show loading indicator
+      showLoadingIndicator();
+      
+      // Collect form data
+      const data = collectInvestmentData();
+      
+      // Send to server or use sample data
+      simulateAnalysis(data);
+    }
+    
+    // Helper function to collect portfolio analysis data
+    function collectPortfolioData() {
+      const connectionType = document.getElementById('connection_type').value;
+      
+      // Basic data structure
+      const data = {
+        connection_type: connectionType,
+        profile: {
+          type: "portfolio_analysis",
+        }
+      };
+      
+      // Add connection-specific fields
+      if (connectionType === 'wallet') {
+        data.wallet_address = document.getElementById('wallet_address').value;
+      } else if (connectionType === 'binance') {
+        data.binance_api_key = document.getElementById('binance_api_key').value;
+        data.binance_secret = document.getElementById('binance_secret').value;
+      } else if (connectionType === 'bitget') {
+        data.bitget_api_key = document.getElementById('bitget_api_key').value;
+        data.bitget_secret = document.getElementById('bitget_secret').value;
+        data.bitget_passphrase = document.getElementById('bitget_passphrase').value;
+      }
+      
+      return data;
+    }
+    
+    // Helper function to collect investment recommendation data
+    function collectInvestmentData() {
+      // Extract tags from UI
+      const tagElements = document.querySelectorAll('.tag-item');
+      const tags = Array.from(tagElements).map(el => el.textContent.trim().replace('×', ''));
+      
+      return {
+        connection_type: "none",
+        profile: {
+          type: "investment_recommendations",
+          name: document.getElementById('name').value,
+          budget: parseFloat(document.getElementById('budget').value),
+          risk: document.getElementById('risk').value,
+          interests: tags
+        }
+      };
+    }
+    
+    // Show loading indicator
+    function showLoadingIndicator() {
+      const loadingEl = document.createElement('div');
+      loadingEl.classList.add('loading-container');
+      loadingEl.id = 'loading-indicator';
+      loadingEl.style.position = 'fixed';
+      loadingEl.style.top = '0';
+      loadingEl.style.left = '0';
+      loadingEl.style.width = '100%';
+      loadingEl.style.height = '100%';
+      loadingEl.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+      loadingEl.style.display = 'flex';
+      loadingEl.style.flexDirection = 'column';
+      loadingEl.style.alignItems = 'center';
+      loadingEl.style.justifyContent = 'center';
+      loadingEl.style.zIndex = '1000';
+      
+      loadingEl.innerHTML = `
+        <div style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;"></div>
+        <p>Analyzing market data...</p>
+        <div style="width: 80%; max-width: 400px; height: 20px; background-color: #f3f3f3; border-radius: 10px; margin-top: 1rem; overflow: hidden;">
+          <div id="progress-bar" style="height: 100%; width: 0%; background-color: var(--primary); transition: width 0.3s ease;"></div>
+        </div>
+      `;
+      
+      document.body.appendChild(loadingEl);
+      
+      // Simulate progress bar
+      simulateProgressBar();
+    }
+    
+    // Simulate progress bar
+    function simulateProgressBar() {
+      const progressBar = document.getElementById('progress-bar');
+      let width = 0;
+      
+      const interval = setInterval(() => {
+        if (width >= 90) {
+          clearInterval(interval);
+        } else {
+          width += Math.random() * 5;
+          progressBar.style.width = Math.min(width, 90) + '%';
+        }
+      }, 300);
+    }
+    
+    // Simulate analysis (this would connect to your server in production)
+    function simulateAnalysis(data) {
+      console.log("Analysis data:", data);
+      
+      // In a real implementation, this would call your server API
+      // For now, we'll just redirect to a results page after a delay
+      setTimeout(() => {
+        // Redirect to results page (you would replace this with your actual results display)
+        window.location.href = "results.html";
+      }, 3000);
+    }
+  </script>
   <script src="/static/js/main.js"></script>
   <script src="/static/js/exchange.js"></script>
+  <script src="/static/js/selection.js"></script>
 </body>
 </html>

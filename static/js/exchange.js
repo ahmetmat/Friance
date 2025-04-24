@@ -145,7 +145,7 @@ function collectFormData() {
     loadingEl.id = 'loading-indicator';
     loadingEl.innerHTML = `
       <div class="loading-spinner"></div>
-      <p>Analyzing your portfolio and market data...</p>
+      <p>Analyzing your portfolio and market data... max 45 seconds</p>
     `;
     document.body.appendChild(loadingEl);
   }
@@ -215,118 +215,7 @@ function simulateAnalysis(formData) {
         });
     } else {
         // Test mode - simulate delay and use sample data
-        console.log("Using test mode with sample data");
-        showLoadingIndicator();
-        
-        // Simulate network delay
-        setTimeout(() => {
-            hideLoadingIndicator();
-            
-            // Get sample data based on connection type
-            const sampleData = getSampleDataForConnectionType(formData.connection_type);
-            
-            // Show results
-            document.querySelector('form').style.display = 'none';
-            document.querySelector('.progress-container').style.display = 'none';
-            document.getElementById('results').classList.add('active');
-            
-            // Populate results with sample data
-            populateResults(sampleData);
-        }, 2000);
+       
     }
 }
-  // Get customized sample data based on connection type
-  function getSampleDataForConnectionType(connectionType) {
-    // Base sample data
-    const data = {
-      "market_summary": {
-        "btc_pct": 3.53,
-        "gainers": [
-          { "change": 14.26, "symbol": "STX" },
-          { "change": 9.5, "symbol": "SOL" },
-          { "change": 8.32, "symbol": "KAS" },
-          { "change": 7.12, "symbol": "SUI" },
-          { "change": 6.8, "symbol": "XLM" }
-        ],
-        "losers": [
-          { "change": -2.7, "symbol": "DEXE" },
-          { "change": -2.36, "symbol": "TKX" },
-          { "change": -0.23, "symbol": "TRX" },
-          { "change": -0.14, "symbol": "SUSDS" },
-          { "change": -0.09, "symbol": "USDC" }
-        ],
-        "markdown": "**📈 Top Gainers**\n- STX +14.26%\n- SOL +9.5%\n- KAS +8.32%\n- SUI +7.12%\n- XLM +6.8%\n\n**📉 Top Losers**\n- DEXE -2.7%\n- TKX -2.36%\n- TRX -0.23%\n- SUSDS -0.14%\n- USDC -0.09%\n\n**💰 Bitcoin Update**\n- Bitcoin is up 📈 3.53%",
-        "summary": "The market is seeing a positive trend with Bitcoin up 3.53%, led by top gainers STX, SOL, and KAS, while DEXE, TKX, and TRX are among the losers."
-      },
-      "portfolio_recommendation": {
-        "markdown": "**💼 Portfolio Recommendation**\n- STX (30%): Recent high gains indicate strong momentum...\n- SUI (20%): AI-focused with potential for growth...\n- XLM (50%): Stable infrastructure for balanced risk...",
-        "recommended": [
-          {
-            "alloc_pct": 30,
-            "reason": "Strong short-term momentum with 14.26% gain",
-            "symbol": "stx"
-          },
-          {
-            "alloc_pct": 20,
-            "reason": "Growing AI ecosystem potential",
-            "symbol": "sui"
-          },
-          {
-            "alloc_pct": 50,
-            "reason": "Established infrastructure with medium-risk stability",
-            "symbol": "xlm"
-          }
-        ],
-        "strategy": "Balanced risk with AI and infrastructure focus, considering medium risk level."
-      }
-    };
-    
-    // Customize wallet analysis based on connection type
-    if (connectionType === 'wallet') {
-      data.wallet_analysis = {
-        "address": "0x94845333028B1204Fbe14E1278Fd4Adde46B22ce",
-        "holdings_usd": 8528.13,
-        "token_breakdown": [
-          {
-            "amount": 2.842711376299289,
-            "symbol": "ETH",
-            "usd_value": 8528.13
-          }
-        ]
-      };
-    } 
-    else if (connectionType === 'binance') {
-      data.wallet_analysis = {
-        "address": "Binance: API5X...Z7F3Q",
-        "holdings_usd": 12463.75,
-        "token_breakdown": [
-          {
-            "amount": 0.35,
-            "symbol": "BTC", 
-            "usd_value": 6825.50
-          },
-          {
-            "amount": 1.25,
-            "symbol": "ETH",
-            "usd_value": 3750.00
-          },
-          {
-            "amount": 1850.0,
-            "symbol": "USDT",
-            "usd_value": 1850.00
-          },
-          {
-            "amount": 10.5,
-            "symbol": "SOL",
-            "usd_value": 682.50
-          },
-          {
-            "amount": 85.0,
-            "symbol": "XLM",
-            "usd_value": 355.75
-          }
-        ]
-      };
-    }
-    return data;
-    }
+  
