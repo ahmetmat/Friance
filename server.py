@@ -63,9 +63,10 @@ def analyze():
         try:
             if connection_type == 'wallet':
                 print(f"Connecting to Ethereum wallet: {data.get('wallet_address', '')[:10]}...")
+                # Always use environment variable for Etherscan API key
                 wallet_connector = EthereumWalletConnector(
                     data['wallet_address'],
-                    data.get('etherscan_api_key', os.environ.get('ETHERSCAN_API_KEY', ''))
+                    os.environ.get('ETHERSCAN_API_KEY', '')
                 )
                 wallet = wallet_connector.get_portfolio_value()
                 

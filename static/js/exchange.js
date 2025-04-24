@@ -58,88 +58,85 @@ function toggleConnectionFields() {
   }
   
   // Validate form fields based on selected connection type
-  function validateForm() {
-    // Basic required fields
-    const name = document.getElementById('name').value;
-    const budget = document.getElementById('budget').value;
+ // Validate form fields based on selected connection type
+function validateForm() {
+  // Basic required fields
+  const name = document.getElementById('name').value;
+  const budget = document.getElementById('budget').value;
+  
+  if (!name || !budget) {
+    alert('Please fill in your name and budget.');
+    return false;
+  }
+  
+  // Connection type specific validation
+  const connectionType = document.getElementById('connection_type').value;
+  
+  if (connectionType === 'wallet') {
+    const walletAddress = document.getElementById('wallet_address').value;
     
-    if (!name || !budget) {
-      alert('Please fill in your name and budget.');
+    if (!walletAddress) {
+      alert('Please enter your wallet address.');
       return false;
     }
     
-    // Connection type specific validation
-    const connectionType = document.getElementById('connection_type').value;
+    // Removed Etherscan API key validation
+  } 
+  else if (connectionType === 'binance') {
+    const binanceApiKey = document.getElementById('binance_api_key').value;
+    const binanceSecret = document.getElementById('binance_secret').value;
     
-    if (connectionType === 'wallet') {
-      const walletAddress = document.getElementById('wallet_address').value;
-      const etherscanKey = document.getElementById('etherscan_key').value;
-      
-      if (!walletAddress) {
-        alert('Please enter your wallet address.');
-        return false;
-      }
-      
-      if (!etherscanKey) {
-        alert('Please enter your Etherscan API key.');
-        return false;
-      }
-    } 
-    else if (connectionType === 'binance') {
-      const binanceApiKey = document.getElementById('binance_api_key').value;
-      const binanceSecret = document.getElementById('binance_secret').value;
-      
-      if (!binanceApiKey || !binanceSecret) {
-        alert('Please enter your Binance API key and secret key.');
-        return false;
-      }
+    if (!binanceApiKey || !binanceSecret) {
+      alert('Please enter your Binance API key and secret key.');
+      return false;
     }
-    else if (connectionType === 'bitget') {
-      const bitgetApiKey = document.getElementById('bitget_api_key').value;
-      const bitgetSecret = document.getElementById('bitget_secret').value;
-      const bitgetPassphrase = document.getElementById('bitget_passphrase').value;
-      
-      if (!bitgetApiKey || !bitgetSecret || !bitgetPassphrase) {
-        alert('Please enter your Bitget API key, secret key, and passphrase.');
-        return false;
-      }
-    }
+  }
+  else if (connectionType === 'bitget') {
+    const bitgetApiKey = document.getElementById('bitget_api_key').value;
+    const bitgetSecret = document.getElementById('bitget_secret').value;
+    const bitgetPassphrase = document.getElementById('bitget_passphrase').value;
     
-    return true;
+    if (!bitgetApiKey || !bitgetSecret || !bitgetPassphrase) {
+      alert('Please enter your Bitget API key, secret key, and passphrase.');
+      return false;
+    }
   }
   
-  // Collect all form data into a structured object
-  function collectFormData() {
-    const connectionType = document.getElementById('connection_type').value;
-    
-    // Basic user profile
-    const formData = {
-      connection_type: connectionType,
-      profile: {
-        name: document.getElementById('name').value,
-        budget: parseFloat(document.getElementById('budget').value),
-        risk: document.getElementById('risk').value,
-        interests: window.tags || [] // Global tags array from main.js
-      }
-    };
-    
-    // Connection specific data
-    if (connectionType === 'wallet') {
-      formData.wallet_address = document.getElementById('wallet_address').value;
-      formData.etherscan_api_key = document.getElementById('etherscan_key').value;
-    } 
-    else if (connectionType === 'binance') {
-      formData.binance_api_key = document.getElementById('binance_api_key').value;
-      formData.binance_secret = document.getElementById('binance_secret').value;
+  return true;
+}
+
+// Also update the collectFormData function
+function collectFormData() {
+  const connectionType = document.getElementById('connection_type').value;
+  
+  // Basic user profile
+  const formData = {
+    connection_type: connectionType,
+    profile: {
+      name: document.getElementById('name').value,
+      budget: parseFloat(document.getElementById('budget').value),
+      risk: document.getElementById('risk').value,
+      interests: window.tags || [] // Global tags array from main.js
     }
-    else if (connectionType === 'bitget') {
-      formData.bitget_api_key = document.getElementById('bitget_api_key').value;
-      formData.bitget_secret = document.getElementById('bitget_secret').value;
-      formData.bitget_passphrase = document.getElementById('bitget_passphrase').value;
-    }
-    
-    return formData;
+  };
+  
+  // Connection specific data
+  if (connectionType === 'wallet') {
+    formData.wallet_address = document.getElementById('wallet_address').value;
+    // Removed Etherscan API key field
+  } 
+  else if (connectionType === 'binance') {
+    formData.binance_api_key = document.getElementById('binance_api_key').value;
+    formData.binance_secret = document.getElementById('binance_secret').value;
   }
+  else if (connectionType === 'bitget') {
+    formData.bitget_api_key = document.getElementById('bitget_api_key').value;
+    formData.bitget_secret = document.getElementById('bitget_secret').value;
+    formData.bitget_passphrase = document.getElementById('bitget_passphrase').value;
+  }
+  
+  return formData;
+}
   
   // Show loading indicator
   function showLoadingIndicator() {
